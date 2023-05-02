@@ -6,15 +6,15 @@ public class CategoryDto {
 
     private Long id;
     private String name;
-    private List<ProductDto> productDtos;
+
 
     public CategoryDto() {
     }
 
-    public CategoryDto(Long id, String name, List<ProductDto> productDtos) {
+    public CategoryDto(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.productDtos = productDtos;
+
     }
 
     public Long getId() {
@@ -33,11 +33,4 @@ public class CategoryDto {
         this.name = name;
     }
 
-    public List<ProductDto> getProductDtos() {
-        return productDtos;
-    }
-
-    public void setProductDtos(List<ProductDto> productDtos) {
-        this.productDtos = productDtos;
-    }
 }

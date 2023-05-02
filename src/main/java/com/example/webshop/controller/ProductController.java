@@ -1,7 +1,6 @@
 package com.example.webshop.controller;
 
 import com.example.webshop.model.dto.ProductDto;
-import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,7 @@ public class ProductController {
     }
 
     @GetMapping("/find")
-    public ResponseEntity<List<ProductDto>> getProductsByName(@RequestParam ("name") String name){
+    public ResponseEntity<List<ProductDto>> getProductsByName(@RequestParam String name){
 
         return ResponseEntity.status(HttpStatus.OK).body(productService.findByName(name));
     }

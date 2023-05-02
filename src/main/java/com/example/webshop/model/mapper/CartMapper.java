@@ -27,11 +27,6 @@ public class CartMapper {
         cart.setId(cartDto.getId());
         cart.setTotalPrice(cartDto.getTotalPrice());
 
-//        cart.setCartItems(cartDto.getCartItemDtos().stream()
-//                .map(CartItemMapper::toEntity)
-//                .collect(Collectors.toList()));
-
-
         return cart;
     }
 }

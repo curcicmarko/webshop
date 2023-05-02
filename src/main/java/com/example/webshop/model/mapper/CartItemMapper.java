@@ -23,8 +23,6 @@ public class CartItemMapper {
             cartItem.setId(cartItemDto.getId());
             cartItem.setPrice(cartItemDto.getPrice());
             cartItem.setQuantity(cartItemDto.getQuantity());
-            //cartItem.setProduct(ProductMapper.toEntity(cartItemDto.getProductDto()));
-            //cartItem.setCart(CartMapper.toEntity(cartItemDto.getCartDto()));
 
             return cartItem;
         }

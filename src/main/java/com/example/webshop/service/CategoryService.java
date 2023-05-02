@@ -6,7 +6,6 @@ import com.example.webshop.model.mapper.CategoryMapper;
 import com.example.webshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,11 +16,14 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     public List<CategoryDto> getCategories(){
-        return categoryRepository.findAll().stream().map(CategoryMapper::toDto).collect(Collectors.toList());
+        return categoryRepository.findAll().stream()
+                .map(CategoryMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public CategoryDto getCategory(Long id){
-        Category category = categoryRepository.findById(id).orElseThrow(()->new IllegalArgumentException("No category with id: "+id));
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(()->new IllegalArgumentException("Category with id: "+id+" dont exist"));
 
         return CategoryMapper.toDto(category);
     }
@@ -33,8 +35,6 @@ public class CategoryService {
 
         return CategoryMapper.toDto(categoryRepository.save(category));
 
-
     }
-
 
 }

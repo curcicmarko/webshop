@@ -1,9 +1,7 @@
 package com.example.webshop.controller;
 
 import com.example.webshop.model.dto.CartDto;
-import com.example.webshop.model.entity.Cart;
 import com.example.webshop.service.CartService;
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +27,30 @@ public class CartController {
     }
 
     @PostMapping("/{cartId}/items/{productId}")
-    public ResponseEntity<CartDto> addToCart(@PathVariable Long cartId, @PathVariable Long productId, @RequestParam int quantity, @RequestParam Long userId){
+    public ResponseEntity<CartDto> addToCart(@PathVariable Long cartId, @PathVariable Long productId,
+                                             @RequestParam int quantity, @RequestParam Long userId){
+
         return ResponseEntity.status(HttpStatus.OK).body(cartService.addToCart(cartId,productId,quantity,userId));
 
     }
+
+    @PutMapping("/{cartId}/update")
+    public ResponseEntity<CartDto> updateCart(@PathVariable Long cartId,
+                                              @RequestParam Long productId, @RequestParam int quantity){
+
+        return ResponseEntity.status(HttpStatus.OK).body(cartService.updateCart(cartId,productId,quantity));
+
+    }
+
+    @GetMapping("/user-carts/{userId}")
+    public ResponseEntity<List<CartDto>> findCartsByUser(@PathVariable Long userId){
+        return ResponseEntity.status(HttpStatus.OK).body(cartService.findCartByUser(userId));
+    }
+
+    @DeleteMapping("/{cartId}")
+    public ResponseEntity<Void> deleteCart(@PathVariable Long cartId){
+        cartService.deleteCart(cartId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }

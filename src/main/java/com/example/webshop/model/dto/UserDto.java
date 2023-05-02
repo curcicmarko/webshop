@@ -14,9 +14,7 @@ public class UserDto {
     private String address;
     private String city;
     private UserRole role;
-    private List<OrderDto> orderDtos;
 
-    private List<CartDto> cartDtos;
 
     public UserDto() {
     }
@@ -97,19 +95,5 @@ public class UserDto {
         this.role = role;
     }
 
-    public List<OrderDto> getOrderDtos() {
-        return orderDtos;
-    }
 
-    public void setOrderDtos(List<OrderDto> orderDtos) {
-        this.orderDtos = orderDtos;
-    }
-
-    public List<CartDto> getCartDtos() {
-        return cartDtos;
-    }
-
-    public void setCartDtos(List<CartDto> cartDtos) {
-        this.cartDtos = cartDtos;
-    }
 }

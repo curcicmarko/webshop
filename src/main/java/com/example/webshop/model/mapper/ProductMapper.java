@@ -13,6 +13,7 @@ public class ProductMapper {
     private ProductRepository productRepository;
 
     public static ProductDto toDto(Product product) {
+
         ProductDto productDto = new ProductDto();
         productDto.setId(product.getId());
         productDto.setName(product.getName());
@@ -27,19 +28,14 @@ public class ProductMapper {
 
     }
 
-    public static Product toEntity(ProductDto productDto){
-
+    public static Product toEntity(ProductDto productDto) {
 
         Product product = new Product();
-
-        //product.setId(productDto.getId());
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
         product.setAvailableQuantity(productDto.getAvailableQuantity());
         product.setPictureUrl(product.getPictureUrl());
-
-
 
         return product;
 

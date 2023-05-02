@@ -23,7 +23,9 @@ public class ProductService {
 
 
     public List<ProductDto> getProducts(){
-        return productRepository.findAll().stream().map(ProductMapper::toDto).collect(Collectors.toList());
+        return productRepository.findAll().stream()
+                .map(ProductMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public ProductDto getProduct(Long id){
@@ -33,7 +35,9 @@ public class ProductService {
 
     public List<ProductDto> findByName(String name){
         List<Product> products = productRepository.findByNameContaining(name);
-        return products.stream().map(ProductMapper::toDto).collect(Collectors.toList());
+        return products.stream()
+                .map(ProductMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public ProductDto createProduct(ProductDto productDto){
@@ -44,9 +48,9 @@ public class ProductService {
         product.setPrice(productDto.getPrice());
         product.setDescription(productDto.getDescription());
         product.setPictureUrl(productDto.getPictureUrl());
-        Category category = categoryRepository.findById(productDto.getCategoryId()).orElseThrow(()-> new IllegalArgumentException("Non existing category id"));
+        Category category = categoryRepository.findById(productDto.getCategoryId())
+                .orElseThrow(()-> new IllegalArgumentException("Category with requested id dont exist"));
         product.setCategory(category);
-
         productRepository.save(product);
 
         return ProductMapper.toDto(product);

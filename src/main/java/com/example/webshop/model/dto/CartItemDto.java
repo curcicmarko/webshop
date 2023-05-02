@@ -4,10 +4,6 @@ public class CartItemDto {
 
     private Long id;
 
-   // private ProductDto productDto;
-
-   // private CartDto cartDto;
-
     private String productName;
     private int quantity;
     private double price;
@@ -46,22 +42,6 @@ public class CartItemDto {
     public void setPrice(double price) {
         this.price = price;
     }
-
-//    public ProductDto getProductDto() {
-//        return productDto;
-//    }
-//
-//    public void setProductDto(ProductDto productDto) {
-//        this.productDto = productDto;
-//    }
-//
-//    public CartDto getCartDto() {
-//        return cartDto;
-//    }
-//
-//    public void setCartDto(CartDto cartDto) {
-//        this.cartDto = cartDto;
-//    }
 
     public String getProductName() {
         return productName;
