@@ -2,7 +2,6 @@ package com.example.webshop.model.mapper;
 
 import com.example.webshop.model.dto.CategoryDto;
 import com.example.webshop.model.entity.Category;
-import java.util.stream.Collectors;
 
 public class CategoryMapper {
 

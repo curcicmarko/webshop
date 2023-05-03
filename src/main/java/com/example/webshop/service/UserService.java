@@ -23,12 +23,13 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public UserDto getUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow();
+    public UserDto getUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
         return UserMapper.toDto(user);
     }
 
-    public UserDto createUser(UserDto userDto){
+    public UserDto createUser(UserDto userDto) {
 
         User user = new User();
         user.setFirstName(userDto.getFirstName());
@@ -42,6 +43,31 @@ public class UserService {
 
         return UserMapper.toDto(user);
 
+
+    }
+
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
+
+        userRepository.delete(user);
+
+    }
+
+    public UserDto updateUser(Long userId, UserDto userDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
+
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(userDto.getPassword());
+        user.setAddress(userDto.getAddress());
+        user.setCity(userDto.getCity());
+        user.setUserRole(userDto.getRole());
+        userRepository.save(user);
+
+        return UserMapper.toDto(user);
 
     }
 

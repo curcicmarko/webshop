@@ -42,7 +42,7 @@ public class CartService {
     public CartDto getCart(Long cartId) {
 
         Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId+" dont exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId + " dont exist"));
         return CartMapper.toDto(cart);
     }
 
@@ -50,9 +50,9 @@ public class CartService {
 
         Cart cart = cartRepository.findById(cartId).orElseGet(Cart::new);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId+" dont exist"));
+                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId+" dont exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
 
         if (cart.getUser() == null) {
             cart.setTotalPrice(0);
@@ -101,14 +101,14 @@ public class CartService {
     public CartDto updateCart(Long cartId, Long productId, int quantity) {
 
         Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId+" dont exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId + " does not exist"));
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId+" dont exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
 
 
         if (quantity < 0)
-            throw new IllegalArgumentException("Quantity cant be negative number");
+            throw new IllegalArgumentException("Quantity can't be negative number");
 
 
         CartItem existingCartItem = cart.getCartItems().stream()
@@ -147,10 +147,10 @@ public class CartService {
 
     }
 
-    public List<CartDto> findCartByUser(Long userId){
+    public List<CartDto> findCartByUser(Long userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new IllegalArgumentException("User with Id: "+userId+" dont exist"));
+                .orElseThrow(() -> new IllegalArgumentException("User with Id: " + userId + " does not exist"));
 
         return cartRepository.findByUser(user).stream()
                 .map(CartMapper::toDto)
@@ -158,12 +158,40 @@ public class CartService {
 
     }
 
-    public void deleteCart(Long cartId){
+    public void deleteCart(Long cartId) {
 
         Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(()-> new IllegalArgumentException("Cart with id: "+cartId+" dont exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Cart with id: " + cartId + " does not exist"));
 
         cartRepository.delete(cart);
+    }
+
+    public void removeItemFromCart(Long cartId, Long productId) {
+
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId + " does not exist"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
+
+        CartItem existingCartItem = cart.getCartItems().stream()
+                .filter(i -> i.getProduct().getId() == productId)
+                .findFirst().orElse(null);
+
+        if (existingCartItem == null) {
+            throw new IllegalArgumentException("Requested Product is not in shopping cart");
+
+        } else {
+            cart.getCartItems().remove(existingCartItem);
+            cartItemRepository.delete(existingCartItem);
+            cart.setTotalPrice(cart.getCartItems().stream()
+                    .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                    .reduce(0, Double::sum));
+
+            cartRepository.save(cart);
+        }
+
+
     }
 
 

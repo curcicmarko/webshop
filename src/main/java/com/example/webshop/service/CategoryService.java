@@ -15,26 +15,32 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public List<CategoryDto> getCategories(){
+    public List<CategoryDto> getCategories() {
         return categoryRepository.findAll().stream()
                 .map(CategoryMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public CategoryDto getCategory(Long id){
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("Category with id: "+id+" dont exist"));
+    public CategoryDto getCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category with id: " + categoryId + " does not exist"));
 
         return CategoryMapper.toDto(category);
     }
 
-    public CategoryDto createCategory(CategoryDto categoryDto){
+    public CategoryDto createCategory(CategoryDto categoryDto) {
 
         Category category = new Category();
         category.setName(categoryDto.getName());
-
         return CategoryMapper.toDto(categoryRepository.save(category));
 
+    }
+
+    public void deleteCategory(Long categoryId) {
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category with id: " + categoryId + " does not exist"));
+        categoryRepository.delete(category);
     }
 
 }

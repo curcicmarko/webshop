@@ -1,8 +1,6 @@
 package com.example.webshop.model.mapper;
 
-import com.example.webshop.model.dto.CategoryDto;
 import com.example.webshop.model.dto.ProductDto;
-import com.example.webshop.model.entity.Category;
 import com.example.webshop.model.entity.Product;
 import com.example.webshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
