@@ -21,6 +21,12 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrders());
     }
 
+    @GetMapping("/page")
+    public ResponseEntity<List<OrderDto>> getOrders(@RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "5") int size) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrdersPage(page, size));
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrder(orderId));
@@ -29,6 +35,14 @@ public class OrderController {
     @GetMapping("/user-orders/{userId}")
     public ResponseEntity<List<OrderDto>> findOrdersByUser(@PathVariable Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.findOrdersByUser(userId));
+    }
+
+    @GetMapping("/user-orders/page/{userId}")
+    public ResponseEntity<List<OrderDto>> findOrdersByUser(@PathVariable Long userId,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "5") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.findOrdersByUserPage(userId, page, size));
     }
 
     @PostMapping("/create/{cartId}")

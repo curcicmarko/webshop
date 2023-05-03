@@ -4,8 +4,10 @@ import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.service.UserService;
 import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,12 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<List<UserDto>> getUsers() {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUsers());
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<List<UserDto>> getUsersPage(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "5") int size) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getUsersPage(page,size));
     }
 
     @GetMapping("/{id}")

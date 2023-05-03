@@ -1,12 +1,18 @@
 package com.example.webshop.service;
 
 import com.example.webshop.model.dto.ProductDto;
+import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.entity.Category;
 import com.example.webshop.model.entity.Product;
+import com.example.webshop.model.entity.User;
 import com.example.webshop.model.mapper.ProductMapper;
+import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.repository.CategoryRepository;
 import com.example.webshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +29,14 @@ public class ProductService {
 
     public List<ProductDto> getProducts() {
         return productRepository.findAll().stream()
+                .map(ProductMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductDto> getProductsPage(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Product> products = productRepository.findAll(pageable);
+        return products.stream()
                 .map(ProductMapper::toDto)
                 .collect(Collectors.toList());
     }

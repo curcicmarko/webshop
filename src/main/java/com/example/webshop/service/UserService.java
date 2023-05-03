@@ -5,6 +5,9 @@ import com.example.webshop.model.entity.User;
 import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +18,14 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    public List<UserDto> getUsersPage(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<User> users = userRepository.findAll(pageable);
+        return users.stream()
+                .map(UserMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
     public List<UserDto> getUsers() {
 

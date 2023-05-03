@@ -20,6 +20,13 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(productService.getProducts());
     }
 
+    @GetMapping("/page")
+    public ResponseEntity<List<ProductDto>> getProductsPage(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "5") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(productService.getProductsPage(page,size));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(productService.getProduct(id));

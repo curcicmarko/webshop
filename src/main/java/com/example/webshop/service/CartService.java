@@ -1,16 +1,21 @@
 package com.example.webshop.service;
 
 import com.example.webshop.model.dto.CartDto;
+import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.entity.Cart;
 import com.example.webshop.model.entity.CartItem;
 import com.example.webshop.model.entity.Product;
 import com.example.webshop.model.entity.User;
 import com.example.webshop.model.mapper.CartMapper;
+import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.repository.CartItemRepository;
 import com.example.webshop.repository.CartRepository;
 import com.example.webshop.repository.ProductRepository;
 import com.example.webshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +43,16 @@ public class CartService {
                 .collect(Collectors.toList());
 
     }
+
+    public List<CartDto> getCartsPage(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Cart> carts = cartRepository.findAll(pageable);
+        return carts.stream()
+                .map(CartMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+
 
     public CartDto getCart(Long cartId) {
 
@@ -165,6 +180,7 @@ public class CartService {
 
         cartRepository.delete(cart);
     }
+
 
     public void removeItemFromCart(Long cartId, Long productId) {
 

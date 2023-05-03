@@ -1,10 +1,15 @@
 package com.example.webshop.service;
 
+import com.example.webshop.model.dto.CartDto;
 import com.example.webshop.model.dto.OrderDto;
 import com.example.webshop.model.entity.*;
+import com.example.webshop.model.mapper.CartMapper;
 import com.example.webshop.model.mapper.OrderMapper;
 import com.example.webshop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,6 +34,29 @@ public class OrderService {
 
     @Autowired
     private UserRepository userRepository;
+
+
+    public OrderDto getOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order with Id: " + orderId + " does not exist"));
+
+        return OrderMapper.toDto(order);
+
+    }
+
+    public List<OrderDto> getOrders() {
+        return orderRepository.findAll().stream()
+                .map(OrderMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<OrderDto> getOrdersPage(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Order> orders = orderRepository.findAll(pageable);
+        return orders.stream()
+                .map(OrderMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
     public OrderDto createOrder(Long cartId) {
 
@@ -71,19 +99,6 @@ public class OrderService {
         return OrderMapper.toDto(order);
     }
 
-    public OrderDto getOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order with Id: " + orderId + " does not exist"));
-
-        return OrderMapper.toDto(order);
-
-    }
-
-    public List<OrderDto> getOrders() {
-        return orderRepository.findAll().stream()
-                .map(OrderMapper::toDto)
-                .collect(Collectors.toList());
-    }
 
     public List<OrderDto> findOrdersByUser(Long userId) {
         User user = userRepository.findById(userId)
@@ -92,6 +107,20 @@ public class OrderService {
         return orderRepository.findByUser(user).stream()
                 .map(OrderMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<OrderDto> findOrdersByUserPage(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with Id: " + userId + " does not exist"));
+
+        Page<Order> orders = orderRepository.findByUser(user, pageable);
+
+        return orders.stream()
+                .map(OrderMapper::toDto)
+                .collect(Collectors.toList());
+
+
     }
 
     public void deleteOrder(Long orderId) {
