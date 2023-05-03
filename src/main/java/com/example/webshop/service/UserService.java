@@ -71,5 +71,13 @@ public class UserService {
 
     }
 
+    public UserDto findUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("User with email: " + email + " does not exist");
+        }
+        return UserMapper.toDto(user);
+    }
+
 
 }
