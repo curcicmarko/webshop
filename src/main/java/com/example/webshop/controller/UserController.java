@@ -1,6 +1,7 @@
 package com.example.webshop.controller;
 
 import com.example.webshop.model.dto.UserDto;
+import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.service.UserService;
 import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class UserController {
 
     @GetMapping("/find")
     public ResponseEntity<UserDto> findUserByEmail(@RequestParam String email) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.findUserByEmail(email));
+        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.toDto(userService.findUserByEmail(email)));
 
     }
 

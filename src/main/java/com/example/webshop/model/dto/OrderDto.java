@@ -1,18 +1,16 @@
 package com.example.webshop.model.dto;
 
-import com.example.webshop.model.entity.Order;
-import com.example.webshop.model.entity.User;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class OrderDto {
 
     private Long id;
 
     private List<OrderItemDto> orderItemDtos;
+
     private LocalDateTime createdAt;
+
     private double orderPrice;
 
     public OrderDto() {

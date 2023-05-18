@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,7 @@ public class UserService {
 
     public UserDto createUser(UserDto userDto) {
 
+        System.out.println("Usao u create User");
         User user = new User();
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
@@ -50,16 +54,15 @@ public class UserService {
         user.setAddress(userDto.getAddress());
         user.setCity(userDto.getCity());
         user.setUserRole(userDto.getRole());
-        userRepository.save(user);
 
-        return UserMapper.toDto(user);
+        return UserMapper.toDto(userRepository.save(user));
 
 
     }
 
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("User with id: %s does not exist", userId)));
 
         userRepository.delete(user);
 
@@ -82,13 +85,18 @@ public class UserService {
 
     }
 
-    public UserDto findUserByEmail(String email) {
+    public User findUserByEmail(String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new IllegalArgumentException("User with email: " + email + " does not exist");
+           throw new IllegalArgumentException("User with email: " + email + " does not exist");
         }
-        return UserMapper.toDto(user);
+        return user;
     }
+
+    public boolean userWithEmailExists(String email) {
+        return userRepository.findByEmail(email) != null;
+    }
+
 
 
 }

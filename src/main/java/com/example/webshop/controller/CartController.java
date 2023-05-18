@@ -1,7 +1,6 @@
 package com.example.webshop.controller;
 
 import com.example.webshop.model.dto.CartDto;
-import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +80,7 @@ public class CartService {
             throw new IllegalArgumentException("Requested quantity exceeds available quantity");
 
         CartItem existingCartItem = cart.getCartItems().stream()
-                .filter(i -> i.getProduct().getId() == productId)
+                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
                 .findFirst().orElse(null);
 
         if (existingCartItem != null) {
@@ -127,7 +128,7 @@ public class CartService {
 
 
         CartItem existingCartItem = cart.getCartItems().stream()
-                .filter(i -> i.getProduct().getId() == productId)
+                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
                 .findFirst().orElse(null);
 
         if (existingCartItem == null)
@@ -146,7 +147,7 @@ public class CartService {
 
             existingCartItem.setQuantity(quantity);
             cart.getCartItems().stream()
-                    .filter(i -> i.getProduct().getId() == productId)
+                    .filter(i -> Objects.equals(i.getProduct().getId(), productId))
                     .forEach(i -> i.setQuantity(quantity));
 
             cartItemRepository.save(existingCartItem);
@@ -191,7 +192,7 @@ public class CartService {
                 .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
 
         CartItem existingCartItem = cart.getCartItems().stream()
-                .filter(i -> i.getProduct().getId() == productId)
+                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
                 .findFirst().orElse(null);
 
         if (existingCartItem == null) {

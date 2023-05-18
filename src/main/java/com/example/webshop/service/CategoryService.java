@@ -31,6 +31,10 @@ public class CategoryService {
     public CategoryDto createCategory(CategoryDto categoryDto) {
 
         Category category = new Category();
+//        Category ct = Category.builder()
+//                .name(categoryDto.getName())
+//                .products(List.of())
+//                .build();
         category.setName(categoryDto.getName());
         return CategoryMapper.toDto(categoryRepository.save(category));
 
