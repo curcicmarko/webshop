@@ -66,8 +66,8 @@ public class OrderService {
         Order order = new Order();
         order.setOrderPrice(cart.getTotalPrice());
         order.setUser(cart.getUser());
-        LocalDateTime localDateTime = order.getCreatedAt();
 
+        LocalDateTime localDateTime = order.getCreatedAt();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String formattedDateTime = localDateTime.format(formatter);
         LocalDateTime newLocalDateTime = LocalDateTime.parse(formattedDateTime, formatter);

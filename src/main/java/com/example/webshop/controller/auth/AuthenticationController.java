@@ -20,7 +20,7 @@ public class AuthenticationController {
     private AuthService authService;
 
     @GetMapping("/getUser")
-    @PreAuthorize("@authService.hasAccess({'ADMINISTRATOR'})")
+    @PreAuthorize("@authService.hasAccess({'ADMINISTRATOR','USER'})")
     public ResponseEntity<UserDto> getAuthenticatedUser() {
         return ResponseEntity.status(HttpStatus.OK).body(authService.getAuthenticatedUser());
     }

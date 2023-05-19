@@ -73,17 +73,17 @@ public class AuthService {
                     .jwtToken(authToken.getAccessToken()).refreshToken(authToken.getRefreshToken()).build();
         }
         if (!jwtProvider.isTokenExpired(authToken.getRefreshToken())) {
-            String newAccessToken = generateNewAccesToken(user);
+            String newAccessToken = generateNewAccessToken(user);
             return AuthResponse.builder()
                     .jwtToken(newAccessToken).refreshToken(authToken.getRefreshToken()).build();
         }
-        String newAccessToken = generateNewAccesToken(user);
+        String newAccessToken = generateNewAccessToken(user);
         String newRefreshToken = generateNewRefreshToken(user);
 
         return AuthResponse.builder().jwtToken(newAccessToken).refreshToken(newRefreshToken).build();
     }
 
-    private String generateNewAccesToken(User user) {
+    private String generateNewAccessToken(User user) {
         AuthToken authToken = authTokenService.getAuthTokenByUser(user);
         String accessToken = jwtProvider.generateToken(user.getEmail(), user.getUserRole().getName());
         authToken.setAccessToken(accessToken);

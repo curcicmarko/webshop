@@ -60,4 +60,11 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @PostMapping("/add-to-cart")
+    public ResponseEntity<CartDto> addToCartNew (@RequestParam Long productId, @RequestParam int quantity) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(cartService.addToCartNew(productId, quantity));
+
+    }
+
 }

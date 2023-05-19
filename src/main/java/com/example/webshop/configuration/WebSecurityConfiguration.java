@@ -4,6 +4,7 @@ import com.example.webshop.configuration.auth.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,6 +29,9 @@ public class WebSecurityConfiguration {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/authenticate/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
+                .requestMatchers(HttpMethod.GET,"/category/**").permitAll()
+                .requestMatchers("/cart/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

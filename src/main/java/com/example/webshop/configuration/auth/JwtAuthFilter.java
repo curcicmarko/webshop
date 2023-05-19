@@ -43,7 +43,6 @@ public class JwtAuthFilter extends GenericFilterBean {
 
         String token = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         if (!isNull(token) && !authenticated(token)) {
-            System.out.println("OVO JE KAO EMAIL "+jwtProvider.getEmailFromToken(token));
 
             throw new UnauthorizedException("Not authorized");
         }

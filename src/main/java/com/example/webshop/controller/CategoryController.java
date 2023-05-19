@@ -5,6 +5,7 @@ import com.example.webshop.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -26,11 +27,13 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("@authService.hasAccess({'ADMINISTRATOR'})")
     public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
         return ResponseEntity.status(HttpStatus.OK).body(categoryService.createCategory(categoryDto));
     }
 
     @DeleteMapping("/{categoryId}")
+    @PreAuthorize("@authService.hasAccess({'ADMINISTRATOR'})")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
         categoryService.deleteCategory(categoryId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

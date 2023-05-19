@@ -5,6 +5,7 @@ import com.example.webshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,17 +41,20 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("@authService.hasAccess({'ADMINISTRATOR'})")
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
         return ResponseEntity.status(HttpStatus.OK).body(productService.createProduct(productDto));
     }
 
     @PutMapping("/{productId}")
+    @PreAuthorize("@authService.hasAccess({'ADMINISTRATOR'})")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable Long productId, @RequestBody ProductDto productDto) {
         return ResponseEntity.status(HttpStatus.OK).body(productService.updateProduct(productId, productDto));
 
     }
 
     @DeleteMapping("/{productId}")
+    @PreAuthorize("@authService.hasAccess({'ADMINISTRATOR'})")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
         productService.deleteProduct(productId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

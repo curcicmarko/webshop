@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,8 +66,10 @@ public class CartService {
     public CartDto addToCart(Long cartId, Long productId, int quantity, Long userId) {
 
         Cart cart = cartRepository.findById(cartId).orElseGet(Cart::new);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
 
@@ -111,6 +114,66 @@ public class CartService {
         cartRepository.save(cart);
 
         return CartMapper.toDto(cart);
+
+    }
+
+    public CartDto addToCartNew(Long productId, int quantity){
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User loggedUser = userRepository.findByEmail(email);
+        Cart cart;
+
+        if(loggedUser.getCarts().isEmpty())
+            cart = new Cart();
+        else
+            cart = loggedUser.getCarts().get(0);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
+
+        // da li je korpa nova ?
+        if (cart.getUser() == null) {
+            cart.setTotalPrice(0);
+            cart.setUser(loggedUser);
+            cartRepository.save(cart);
+        }
+
+        if (product.getAvailableQuantity() < quantity)
+            throw new IllegalArgumentException("Requested quantity exceeds available quantity");
+
+        CartItem existingCartItem = cart.getCartItems().stream()
+                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
+                .findFirst().orElse(null);
+
+        if (existingCartItem != null) {
+            existingCartItem.setQuantity(existingCartItem.getQuantity() + quantity);
+            cart.setTotalPrice(existingCartItem.getQuantity() * existingCartItem.getPrice());
+            cartItemRepository.save(existingCartItem);
+
+
+        } else {
+
+            CartItem cartItem = new CartItem();
+            cartItem.setQuantity(quantity);
+            cartItem.setPrice(product.getPrice());
+            cartItem.setProduct(product);
+
+            cart.getCartItems().add(cartItem);
+            cartItem.setCart(cart);
+            cartItemRepository.save(cartItem);
+
+        }
+
+        cart.setTotalPrice(cart.getCartItems().stream()
+                .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                .reduce(0, Double::sum));
+
+        loggedUser.getCarts().add(cart);
+        userRepository.save(loggedUser);
+        cartRepository.save(cart);
+
+        return CartMapper.toDto(cart);
+
 
     }
 
