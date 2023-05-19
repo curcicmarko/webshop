@@ -5,26 +5,22 @@ import com.example.webshop.model.entity.OrderItem;
 
 public class OrderItemMapper {
 
-    public static OrderItemDto toDto(OrderItem orderItem){
-
-        OrderItemDto orderItemDto = new OrderItemDto();
-        orderItemDto.setId(orderItem.getId());
-        orderItemDto.setPrice(orderItem.getPrice());
-        orderItemDto.setQuantity(orderItem.getQuantity());
-        orderItemDto.setProductName(orderItem.getProduct().getName());
-        orderItemDto.setOrderId(orderItem.getOrder().getId());
-
-        return orderItemDto;
+    public static OrderItemDto toDto(OrderItem orderItem) {
+        return OrderItemDto.builder()
+                .id(orderItem.getId())
+                .price(orderItem.getPrice())
+                .quantity(orderItem.getQuantity())
+                .productName(orderItem.getProduct().getName())
+                .orderId(orderItem.getOrder().getId())
+                .build();
     }
 
-    public static OrderItem toEntity(OrderItemDto orderItemDto){
 
-        OrderItem orderItem = new OrderItem();
-        orderItem.setPrice(orderItemDto.getPrice());
-        orderItem.setQuantity(orderItemDto.getQuantity());
-
-        return orderItem;
-
+    public static OrderItem toEntity(OrderItemDto orderItemDto) {
+        return OrderItem.builder()
+                .price(orderItemDto.getPrice())
+                .quantity(orderItemDto.getQuantity())
+                .build();
     }
 
 }

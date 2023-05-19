@@ -2,11 +2,8 @@ package com.example.webshop.configuration.auth;
 
 import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.entity.User;
-import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,7 +15,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserDetailsService {
-
 
 
     private final UserService userService;

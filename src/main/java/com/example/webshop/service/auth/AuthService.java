@@ -50,7 +50,7 @@ public class AuthService {
         User user = findUserByEmail(authRequest.getEmail());
 
         if (!passwordEncoder.matches(authRequest.getPassword(), user.getPassword())) {
-            throw new BadRequestException("Invalid credentials !!!");
+            throw new BadRequestException("Invalid credentials");
         }
         if (authTokenService.userHasAccessToken(user)) {
             return generateAuthTokenFromExistingToken(user);
@@ -130,7 +130,7 @@ public class AuthService {
 
     public UserDto register(UserDto userDto) {
         if (userWithEmailExists(userDto.getEmail())) {
-            throw new BadRequestException(String.format("User with email %s  exists", userDto.getEmail()));
+            throw new BadRequestException(String.format("User with email %s already exists", userDto.getEmail()));
         }
         User user = UserMapper.toEntity(userDto);
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));

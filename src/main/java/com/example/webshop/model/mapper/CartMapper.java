@@ -7,26 +7,24 @@ import java.util.stream.Collectors;
 
 public class CartMapper {
 
-    public static CartDto toDto(Cart cart){
 
-        CartDto cartDto = new CartDto();
-        cartDto.setId(cart.getId());
-        cartDto.setTotalPrice(cart.getTotalPrice());
-        cartDto.setUserId(cart.getUser().getId());
-
-        cartDto.setCartItemDtos(cart.getCartItems().stream()
-                .map(CartItemMapper::toDto)
-                .collect(Collectors.toList()));
-
-        return cartDto;
+    public static CartDto toDto(Cart cart) {
+        return CartDto.builder()
+                .id(cart.getId())
+                .totalPrice(cart.getTotalPrice())
+                .userId(cart.getUser().getId())
+                .cartItemDtos(cart.getCartItems().stream()
+                        .map(CartItemMapper::toDto)
+                        .collect(Collectors.toList()))
+                .build();
     }
 
-    public static Cart toEntity(CartDto cartDto){
 
-        Cart cart = new Cart();
-        cart.setId(cartDto.getId());
-        cart.setTotalPrice(cartDto.getTotalPrice());
-
-        return cart;
+    public static Cart toEntity(CartDto cartDto) {
+        return Cart.builder()
+                .id(cartDto.getId())
+                .totalPrice(cartDto.getTotalPrice())
+                .build();
     }
+
 }

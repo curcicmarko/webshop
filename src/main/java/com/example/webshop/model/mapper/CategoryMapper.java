@@ -6,17 +6,16 @@ import com.example.webshop.model.entity.Category;
 public class CategoryMapper {
 
     public static CategoryDto toDto(Category category) {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setId(category.getId());
-        categoryDto.setName(category.getName());
-
-        return categoryDto;
+        return CategoryDto.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .build();
     }
 
     public static Category toEntity(CategoryDto categoryDto) {
-        Category category = new Category();
-        category.setName(categoryDto.getName());
-
-        return category;
+        return Category.builder()
+                .name(categoryDto.getName())
+                .build();
     }
+
 }

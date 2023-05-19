@@ -1,5 +1,6 @@
 package com.example.webshop.service;
 
+import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.entity.User;
 import com.example.webshop.model.mapper.UserMapper;
@@ -8,11 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +18,9 @@ import java.util.stream.Collectors;
 public class UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    private  UserRepository userRepository;
+
+
 
     public List<UserDto> getUsersPage(int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -39,21 +39,21 @@ public class UserService {
 
     public UserDto getUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
+                .orElseThrow(() -> new NotFoundException(String.format("User with id %s is not found", userId)));
         return UserMapper.toDto(user);
     }
 
     public UserDto createUser(UserDto userDto) {
 
-        System.out.println("Usao u create User");
-        User user = new User();
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
-        user.setAddress(userDto.getAddress());
-        user.setCity(userDto.getCity());
-        user.setUserRole(userDto.getRole());
+        User user = User.builder()
+                .firstName(userDto.getFirstName())
+                .lastName(userDto.getLastName())
+                .email(userDto.getEmail())
+                .password(userDto.getPassword())
+                .address(userDto.getAddress())
+                .city(userDto.getCity())
+                .userRole(userDto.getRole())
+                .build();
 
         return UserMapper.toDto(userRepository.save(user));
 
@@ -62,15 +62,16 @@ public class UserService {
 
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("User with id: %s does not exist", userId)));
+                .orElseThrow(() -> new NotFoundException(String.format("User with id %s is not found", userId)));
 
         userRepository.delete(user);
 
     }
 
     public UserDto updateUser(Long userId, UserDto userDto) {
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
+                .orElseThrow(() -> new NotFoundException(String.format("User with id %s is not found", userId)));
 
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
@@ -79,6 +80,7 @@ public class UserService {
         user.setAddress(userDto.getAddress());
         user.setCity(userDto.getCity());
         user.setUserRole(userDto.getRole());
+
         userRepository.save(user);
 
         return UserMapper.toDto(user);
@@ -88,7 +90,7 @@ public class UserService {
     public User findUserByEmail(String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-           throw new IllegalArgumentException("User with email: " + email + " does not exist");
+           throw new NotFoundException(String.format("User with email %s is not found", email));
         }
         return user;
     }
@@ -96,7 +98,5 @@ public class UserService {
     public boolean userWithEmailExists(String email) {
         return userRepository.findByEmail(email) != null;
     }
-
-
 
 }

@@ -1,5 +1,6 @@
 package com.example.webshop.service;
 
+import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.dto.CartDto;
 import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.entity.Cart;
@@ -55,183 +56,145 @@ public class CartService {
     }
 
 
-
     public CartDto getCart(Long cartId) {
 
         Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId + " dont exist"));
+                .orElseThrow(() -> new NotFoundException(String.format("Cart with id %s is not found", cartId)));
         return CartMapper.toDto(cart);
     }
 
-    public CartDto addToCart(Long cartId, Long productId, int quantity, Long userId) {
 
-        Cart cart = cartRepository.findById(cartId).orElseGet(Cart::new);
+    public CartDto addToCart(Long productId, int quantity) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User loggedUser = userRepository.findByEmail(email);
+        Cart cart = getOrCreateCart(loggedUser);
+        Product product = getProductById(productId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id: " + userId + " does not exist"));
+        validateAvailableQuantity(product, quantity);
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
-
-        if (cart.getUser() == null) {
-            cart.setTotalPrice(0);
-            cart.setUser(user);
-            cartRepository.save(cart);
-        }
-
-        if (product.getAvailableQuantity() < quantity)
-            throw new IllegalArgumentException("Requested quantity exceeds available quantity");
-
-        CartItem existingCartItem = cart.getCartItems().stream()
-                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
-                .findFirst().orElse(null);
+        CartItem existingCartItem = findExistingCartItem(cart, productId);
 
         if (existingCartItem != null) {
-            existingCartItem.setQuantity(existingCartItem.getQuantity() + quantity);
-            cart.setTotalPrice(existingCartItem.getQuantity() * existingCartItem.getPrice());
-            cartItemRepository.save(existingCartItem);
-
-
+            updateExistingCartItem(existingCartItem, quantity);
         } else {
-
-            CartItem cartItem = new CartItem();
-            cartItem.setQuantity(quantity);
-            cartItem.setPrice(product.getPrice());
-            cartItem.setProduct(product);
-
-            cart.getCartItems().add(cartItem);
-            cartItem.setCart(cart);
-            cartItemRepository.save(cartItem);
-
+            createNewCartItem(cart, product, quantity);
         }
 
-        cart.setTotalPrice(cart.getCartItems().stream()
-                .mapToDouble(i -> i.getPrice() * i.getQuantity())
-                .reduce(0, Double::sum));
+        updateCartTotalPrice(cart);
+        saveCartAndUser(loggedUser, cart);
 
+        return CartMapper.toDto(cart);
+    }
+
+
+    public CartDto updateCart(Long productId, int quantity) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User loggedUser = userRepository.findByEmail(email);
+        Cart cart = getOrCreateCart(loggedUser);
+        Product product = getProductById(productId);
+        validateAvailableQuantity(product, quantity);
+
+        CartItem existingCartItem = findExistingCartItem(cart, productId);
+        if (existingCartItem == null) {
+            throw new NotFoundException("Requested Product is not in the shopping cart");
+        }
+
+        if (quantity == 0) {
+            removeCartItemFromCart(cart, existingCartItem);
+        } else {
+            updateCartItemQuantity(existingCartItem, quantity);
+        }
+
+        updateCartTotalPrice(cart);
+        saveCart(cart);
+
+        return CartMapper.toDto(cart);
+    }
+
+    private Cart getOrCreateCart(User user) {
+        if (user.getCarts().isEmpty()) {
+            Cart cart = new Cart();
+            cart.setTotalPrice(0);
+            cart.setUser(user);
+            return cartRepository.save(cart);
+        } else {
+            return user.getCarts().get(0);
+        }
+    }
+
+    private Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(String.format("Product with id %s is not found", productId)));
+    }
+
+    private void validateAvailableQuantity(Product product, int quantity) {
+        if (product.getAvailableQuantity() < quantity) {
+            throw new IllegalArgumentException("Requested quantity exceeds available quantity");
+        }
+    }
+
+    private CartItem findExistingCartItem(Cart cart, Long productId) {
+        return cart.getCartItems().stream()
+                .filter(item -> Objects.equals(item.getProduct().getId(), productId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void removeCartItemFromCart(Cart cart, CartItem cartItem) {
+        cart.getCartItems().remove(cartItem);
+        cartItemRepository.delete(cartItem);
+        updateCartTotalPrice(cart);
+        cartRepository.save(cart);
+    }
+
+    private void updateCartItemQuantity(CartItem cartItem, int quantity) {
+        cartItem.setQuantity(quantity);
+        cartItemRepository.save(cartItem);
+    }
+
+    private void updateCartTotalPrice(Cart cart) {
+        double totalPrice = cart.getCartItems().stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+        cart.setTotalPrice(totalPrice);
+    }
+
+    private void saveCart(Cart cart) {
+        cartRepository.save(cart);
+    }
+
+    private void updateExistingCartItem(CartItem cartItem, int quantity) {
+        cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        cartItem.setPrice(cartItem.getProduct().getPrice());
+        cartItemRepository.save(cartItem);
+    }
+
+    private void createNewCartItem(Cart cart, Product product, int quantity) {
+        CartItem cartItem = CartItem.builder()
+                .quantity(quantity)
+                .price(product.getPrice())
+                .product(product)
+                .cart(cart)
+                .build();
+
+        cart.getCartItems().add(cartItem);
+        cartItemRepository.save(cartItem);
+    }
+
+
+    private void saveCartAndUser(User user, Cart cart) {
         user.getCarts().add(cart);
         userRepository.save(user);
         cartRepository.save(cart);
-
-        return CartMapper.toDto(cart);
-
     }
 
-    public CartDto addToCartNew(Long productId, int quantity){
+
+    public List<CartDto> findCartByUser() {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         User loggedUser = userRepository.findByEmail(email);
-        Cart cart;
 
-        if(loggedUser.getCarts().isEmpty())
-            cart = new Cart();
-        else
-            cart = loggedUser.getCarts().get(0);
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
-
-        // da li je korpa nova ?
-        if (cart.getUser() == null) {
-            cart.setTotalPrice(0);
-            cart.setUser(loggedUser);
-            cartRepository.save(cart);
-        }
-
-        if (product.getAvailableQuantity() < quantity)
-            throw new IllegalArgumentException("Requested quantity exceeds available quantity");
-
-        CartItem existingCartItem = cart.getCartItems().stream()
-                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
-                .findFirst().orElse(null);
-
-        if (existingCartItem != null) {
-            existingCartItem.setQuantity(existingCartItem.getQuantity() + quantity);
-            cart.setTotalPrice(existingCartItem.getQuantity() * existingCartItem.getPrice());
-            cartItemRepository.save(existingCartItem);
-
-
-        } else {
-
-            CartItem cartItem = new CartItem();
-            cartItem.setQuantity(quantity);
-            cartItem.setPrice(product.getPrice());
-            cartItem.setProduct(product);
-
-            cart.getCartItems().add(cartItem);
-            cartItem.setCart(cart);
-            cartItemRepository.save(cartItem);
-
-        }
-
-        cart.setTotalPrice(cart.getCartItems().stream()
-                .mapToDouble(i -> i.getPrice() * i.getQuantity())
-                .reduce(0, Double::sum));
-
-        loggedUser.getCarts().add(cart);
-        userRepository.save(loggedUser);
-        cartRepository.save(cart);
-
-        return CartMapper.toDto(cart);
-
-
-    }
-
-    public CartDto updateCart(Long cartId, Long productId, int quantity) {
-
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId + " does not exist"));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
-
-
-        if (quantity < 0)
-            throw new IllegalArgumentException("Quantity can't be negative number");
-
-
-        CartItem existingCartItem = cart.getCartItems().stream()
-                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
-                .findFirst().orElse(null);
-
-        if (existingCartItem == null)
-            throw new IllegalArgumentException("Requested Product is not in shopping cart");
-
-        if (quantity == 0) {
-            cart.getCartItems().remove(existingCartItem);
-            cartItemRepository.delete(existingCartItem);
-            cart.setTotalPrice(cart.getCartItems().stream()
-                    .mapToDouble(i -> i.getPrice() * i.getQuantity())
-                    .reduce(0, Double::sum));
-
-            cartRepository.save(cart);
-
-        } else {
-
-            existingCartItem.setQuantity(quantity);
-            cart.getCartItems().stream()
-                    .filter(i -> Objects.equals(i.getProduct().getId(), productId))
-                    .forEach(i -> i.setQuantity(quantity));
-
-            cartItemRepository.save(existingCartItem);
-
-            cart.setTotalPrice(cart.getCartItems().stream()
-                    .mapToDouble(i -> i.getPrice() * i.getQuantity())
-                    .reduce(0, Double::sum));
-
-            cartRepository.save(cart);
-        }
-
-        return CartMapper.toDto(cart);
-
-    }
-
-    public List<CartDto> findCartByUser(Long userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with Id: " + userId + " does not exist"));
-
-        return cartRepository.findByUser(user).stream()
+        return cartRepository.findByUser(loggedUser).stream()
                 .map(CartMapper::toDto)
                 .collect(Collectors.toList());
 
@@ -240,39 +203,9 @@ public class CartService {
     public void deleteCart(Long cartId) {
 
         Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart with id: " + cartId + " does not exist"));
+                .orElseThrow(() -> new NotFoundException(String.format("Cart with id %s is not found", cartId)));
 
         cartRepository.delete(cart);
     }
-
-
-    public void removeItemFromCart(Long cartId, Long productId) {
-
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId + " does not exist"));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
-
-        CartItem existingCartItem = cart.getCartItems().stream()
-                .filter(i -> Objects.equals(i.getProduct().getId(), productId))
-                .findFirst().orElse(null);
-
-        if (existingCartItem == null) {
-            throw new IllegalArgumentException("Requested Product is not in shopping cart");
-
-        } else {
-            cart.getCartItems().remove(existingCartItem);
-            cartItemRepository.delete(existingCartItem);
-            cart.setTotalPrice(cart.getCartItems().stream()
-                    .mapToDouble(i -> i.getPrice() * i.getQuantity())
-                    .reduce(0, Double::sum));
-
-            cartRepository.save(cart);
-        }
-
-
-    }
-
 
 }

@@ -1,5 +1,6 @@
 package com.example.webshop.service;
 
+import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.dto.ProductDto;
 import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.entity.Category;
@@ -54,42 +55,52 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public ProductDto createProduct(ProductDto productDto) {
 
-        Product product = new Product();
-        product.setName(productDto.getName());
-        product.setAvailableQuantity(productDto.getAvailableQuantity());
+    public ProductDto createProduct(ProductDto productDto) {
+        Category category = categoryRepository.findById(productDto.getCategoryId())
+                .orElseThrow(() -> new NotFoundException(String.format
+                        ("Category with id %s is not found", productDto.getCategoryId())));
+
+        Product product = Product.builder()
+                .name(productDto.getName())
+                .availableQuantity(productDto.getAvailableQuantity())
+                .price(productDto.getPrice())
+                .description(productDto.getDescription())
+                .pictureUrl(productDto.getPictureUrl())
+                .category(category)
+                .build();
+
+        productRepository.save(product);
+
+        return ProductMapper.toDto(product);
+    }
+
+    public ProductDto updateProduct(Long productId, ProductDto productDto) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Product with id %s is not found", productId)));
+
+        Category category = categoryRepository.findById(productDto.getCategoryId())
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Category with id %s is not found", productDto.getCategoryId())));
+
         product.setPrice(productDto.getPrice());
+        product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPictureUrl(productDto.getPictureUrl());
-        Category category = categoryRepository.findById(productDto.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Category with Id: " + productDto.getCategoryId() + " does not exist"));
+        product.setAvailableQuantity(productDto.getAvailableQuantity());
         product.setCategory(category);
         productRepository.save(product);
 
         return ProductMapper.toDto(product);
-
     }
 
-    public ProductDto updateProduct(Long productId, ProductDto productDto) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with Id: " + productId + " does not exist"));
 
-        product.setPrice(productDto.getPrice());
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setPictureUrl(productDto.getPictureUrl());
-        product.setAvailableQuantity(productDto.getAvailableQuantity());
-        product.setCategory(categoryRepository.findById(productDto.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Category with Id: " + productDto.getCategoryId() + " does not exist")));
-        productRepository.save(product);
-
-        return ProductMapper.toDto(product);
-    }
 
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with Id: " + productId + " does not exist"));
+                .orElseThrow(() -> new NotFoundException(String.format("Product with id %s is not found", productId)));
 
         productRepository.delete(product);
     }

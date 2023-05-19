@@ -5,26 +5,23 @@ import com.example.webshop.model.entity.CartItem;
 
 public class CartItemMapper {
 
-        public static CartItemDto toDto(CartItem cartItem){
 
-            CartItemDto cartItemDto = new CartItemDto();
-            cartItemDto.setId(cartItem.getId());
-            cartItemDto.setProductName(cartItem.getProduct().getName());
-            cartItemDto.setQuantity(cartItem.getQuantity());
-            cartItemDto.setPrice(cartItem.getPrice());
+    public static CartItemDto toDto(CartItem cartItem) {
+        return CartItemDto.builder()
+                .id(cartItem.getId())
+                .productName(cartItem.getProduct().getName())
+                .quantity(cartItem.getQuantity())
+                .price(cartItem.getPrice())
+                .build();
+    }
 
-            return cartItemDto;
+    public static CartItem toEntity(CartItemDto cartItemDto) {
+        return CartItem.builder()
+                .id(cartItemDto.getId())
+                .price(cartItemDto.getPrice())
+                .quantity(cartItemDto.getQuantity())
+                .build();
+    }
 
-        }
-
-        public static CartItem toEntity(CartItemDto cartItemDto){
-
-            CartItem cartItem = new CartItem();
-            cartItem.setId(cartItemDto.getId());
-            cartItem.setPrice(cartItemDto.getPrice());
-            cartItem.setQuantity(cartItemDto.getQuantity());
-
-            return cartItem;
-        }
 
 }

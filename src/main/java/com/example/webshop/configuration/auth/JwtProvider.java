@@ -60,7 +60,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(email)
-                .setExpiration(generateExpiratonDate())
+                .setExpiration(generateExpirationDate())
                 .setIssuedAt(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()))
                 .claim("roles", role)
                 .signWith(SIGNATURE_ALGORITHM, SECRET)
@@ -71,7 +71,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(email)
-                .setExpiration(generateRefreshTokenExpiratonDate())
+                .setExpiration(generateRefreshTokenExpirationDate())
                 .setIssuedAt(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()))
                 .claim("roles", role)
                 .signWith(SIGNATURE_ALGORITHM, SECRET)
@@ -130,13 +130,13 @@ public class JwtProvider {
         return request.getHeader(AUTH_HEADER);
     }
 
-    private Date generateExpiratonDate() {
+    private Date generateExpirationDate() {
 
         return Date.from(LocalDateTime.now().plusMinutes(EXPIRES_IN)
                 .atZone(ZoneId.systemDefault()).toInstant());
     }
 
-    private Date generateRefreshTokenExpiratonDate() {
+    private Date generateRefreshTokenExpirationDate() {
 
         return Date.from(LocalDateTime.now().plusMinutes(REFRESH_TOKEN_EXPIRATION)
                 .atZone(ZoneId.systemDefault()).toInstant());

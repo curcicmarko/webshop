@@ -1,5 +1,6 @@
 package com.example.webshop.service;
 
+import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.dto.CartDto;
 import com.example.webshop.model.dto.OrderDto;
 import com.example.webshop.model.entity.*;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,7 +40,7 @@ public class OrderService {
 
     public OrderDto getOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order with Id: " + orderId + " does not exist"));
+                .orElseThrow(() -> new NotFoundException(String.format("Order with id: %s  does not exists", orderId)));
 
         return OrderMapper.toDto(order);
 
@@ -58,14 +60,33 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public OrderDto createOrder(Long cartId) {
+    public OrderDto createOrder() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User loggedUser = userRepository.findByEmail(email);
+        Cart cart = loggedUser.getCarts().get(0);
 
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart with Id: " + cartId + " does not exist"));
+        Order order = createNewOrder(cart, loggedUser);
+        saveOrder(order);
 
+        List<CartItem> cartItems = cart.getCartItems();
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = createOrderItem(cartItem, order);
+            saveOrderItem(orderItem);
+
+            updateProductQuantity(cartItem.getProduct(), orderItem.getQuantity());
+
+            order.getOrderItems().add(orderItem);
+        }
+
+        cartRepository.delete(cart);
+
+        return OrderMapper.toDto(order);
+    }
+
+    private Order createNewOrder(Cart cart, User loggedUser) {
         Order order = new Order();
         order.setOrderPrice(cart.getTotalPrice());
-        order.setUser(cart.getUser());
+        order.setUser(loggedUser);
 
         LocalDateTime localDateTime = order.getCreatedAt();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
@@ -73,48 +94,50 @@ public class OrderService {
         LocalDateTime newLocalDateTime = LocalDateTime.parse(formattedDateTime, formatter);
         order.setCreatedAt(newLocalDateTime);
 
+        return order;
+    }
+
+    private void saveOrder(Order order) {
         orderRepository.save(order);
+    }
 
-        List<CartItem> cartItems = cart.getCartItems();
-
-        for (int i = 0; i < cartItems.size(); i++) {
-            CartItem cartItem = cartItems.get(i);
-            OrderItem orderItem = new OrderItem();
-            orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(cartItem.getPrice());
-            orderItem.setProduct(cartItem.getProduct());
-            orderItem.setOrder(order);
-
-            orderItemRepository.save(orderItem);
-            order.getOrderItems().add(orderItem);
-
-            Product product = productRepository.findById(cartItem.getProduct().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Product with Id: " + cartItem.getProduct().getId() + " does not exist"));
-            product.setAvailableQuantity(product.getAvailableQuantity() - orderItem.getQuantity());
-            productRepository.save(product);
-
-        }
-        orderRepository.save(order);
-
-        return OrderMapper.toDto(order);
+    private OrderItem createOrderItem(CartItem cartItem, Order order) {
+        return OrderItem.builder()
+                .quantity(cartItem.getQuantity())
+                .price(cartItem.getPrice())
+                .product(cartItem.getProduct())
+                .order(order)
+                .build();
     }
 
 
-    public List<OrderDto> findOrdersByUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with Id: " + userId + " does not exist"));
+    private void saveOrderItem(OrderItem orderItem) {
+        orderItemRepository.save(orderItem);
+    }
 
-        return orderRepository.findByUser(user).stream()
+    private void updateProductQuantity(Product product, int quantity) {
+        product.setAvailableQuantity(product.getAvailableQuantity() - quantity);
+        productRepository.save(product);
+    }
+
+
+    public List<OrderDto> findOrdersByUser() {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User loggedUser = userRepository.findByEmail(email);
+
+        return orderRepository.findByUser(loggedUser).stream()
                 .map(OrderMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public List<OrderDto> findOrdersByUserPage(Long userId, int page, int size) {
+    public List<OrderDto> findOrdersByUserPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with Id: " + userId + " does not exist"));
 
-        Page<Order> orders = orderRepository.findByUser(user, pageable);
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User loggedUser = userRepository.findByEmail(email);
+
+        Page<Order> orders = orderRepository.findByUser(loggedUser, pageable);
 
         return orders.stream()
                 .map(OrderMapper::toDto)
@@ -125,7 +148,7 @@ public class OrderService {
 
     public void deleteOrder(Long orderId) {
         orderRepository.delete(orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order with Id: " + orderRepository.findById(orderId) + " does not exist")));
+                .orElseThrow(() -> new NotFoundException(String.format("Order with id: %s  does not exists", orderId))));
     }
 
 }

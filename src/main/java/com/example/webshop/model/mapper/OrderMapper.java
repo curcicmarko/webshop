@@ -7,26 +7,29 @@ import java.util.stream.Collectors;
 
 public class OrderMapper {
 
-    public static OrderDto toDto(Order order) {
-        OrderDto orderDto = new OrderDto();
-        orderDto.setId(order.getId());
-        orderDto.setOrderPrice(order.getOrderPrice());
-        orderDto.setCreatedAt(order.getCreatedAt());
-        orderDto.setOrderItemDtos(order.getOrderItems()
-                .stream().map(OrderItemMapper::toDto)
-                .collect(Collectors.toList()));
 
-        return orderDto;
+    public static OrderDto toDto(Order order) {
+        return OrderDto.builder()
+                .id(order.getId())
+                .orderPrice(order.getOrderPrice())
+                .createdAt(order.getCreatedAt())
+                .orderItemDtos(order.getOrderItems().stream()
+                        .map(OrderItemMapper::toDto)
+                        .collect(Collectors.toList()))
+                .build();
+
     }
+
 
     public static Order toEntity(OrderDto orderDto) {
-        Order order = new Order();
-        order.setOrderPrice(orderDto.getOrderPrice());
-        order.setCreatedAt(orderDto.getCreatedAt());
-        order.setOrderItems(orderDto.getOrderItemDtos()
-                .stream().map(OrderItemMapper::toEntity)
-                .collect(Collectors.toList()));
+        return Order.builder()
+                .orderPrice(orderDto.getOrderPrice())
+                .createdAt(orderDto.getCreatedAt())
+                .orderItems(orderDto.getOrderItemDtos().stream()
+                        .map(OrderItemMapper::toEntity)
+                        .collect(Collectors.toList()))
+                .build();
 
-        return order;
     }
+
 }

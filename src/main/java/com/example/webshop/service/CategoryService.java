@@ -1,5 +1,6 @@
 package com.example.webshop.service;
 
+import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.dto.CategoryDto;
 import com.example.webshop.model.entity.Category;
 import com.example.webshop.model.mapper.CategoryMapper;
@@ -23,19 +24,16 @@ public class CategoryService {
 
     public CategoryDto getCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category with id: " + categoryId + " does not exist"));
-
+                .orElseThrow(() -> new NotFoundException(String.format("Category with id %s is not found", categoryId)));
         return CategoryMapper.toDto(category);
     }
 
     public CategoryDto createCategory(CategoryDto categoryDto) {
 
-        Category category = new Category();
-//        Category ct = Category.builder()
-//                .name(categoryDto.getName())
-//                .products(List.of())
-//                .build();
-        category.setName(categoryDto.getName());
+        Category category = Category.builder()
+                .name(categoryDto.getName())
+                .build();
+
         return CategoryMapper.toDto(categoryRepository.save(category));
 
     }
@@ -43,7 +41,7 @@ public class CategoryService {
     public void deleteCategory(Long categoryId) {
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category with id: " + categoryId + " does not exist"));
+                .orElseThrow(() -> new NotFoundException(String.format("Category with id %s is not found", categoryId)));
         categoryRepository.delete(category);
     }
 

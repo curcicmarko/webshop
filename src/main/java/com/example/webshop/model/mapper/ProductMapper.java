@@ -7,35 +7,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProductMapper {
 
-    @Autowired
-    private ProductRepository productRepository;
-
     public static ProductDto toDto(Product product) {
 
-        ProductDto productDto = new ProductDto();
-        productDto.setId(product.getId());
-        productDto.setName(product.getName());
-        productDto.setDescription(product.getDescription());
-        productDto.setPrice(product.getPrice());
-        productDto.setAvailableQuantity(product.getAvailableQuantity());
-        productDto.setPictureUrl(product.getPictureUrl());
-        productDto.setCategoryId(product.getCategory().getId());
-        productDto.setCategoryName(product.getCategory().getName());
-
-        return productDto;
+        return ProductDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .availableQuantity(product.getAvailableQuantity())
+                .pictureUrl(product.getPictureUrl())
+                .categoryId(product.getCategory().getId())
+                .categoryName(product.getCategory().getName())
+                .build();
 
     }
 
     public static Product toEntity(ProductDto productDto) {
 
-        Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setPrice(productDto.getPrice());
-        product.setAvailableQuantity(productDto.getAvailableQuantity());
-        product.setPictureUrl(product.getPictureUrl());
-
-        return product;
+        return Product.builder()
+                .name(productDto.getName())
+                .description(productDto.getDescription())
+                .price(productDto.getPrice())
+                .availableQuantity(productDto.getAvailableQuantity())
+                .pictureUrl(productDto.getPictureUrl())
+                .build();
 
     }
+
 }
