@@ -2,13 +2,11 @@ package com.example.webshop.service;
 
 import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.dto.CartDto;
-import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.entity.Cart;
 import com.example.webshop.model.entity.CartItem;
 import com.example.webshop.model.entity.Product;
 import com.example.webshop.model.entity.User;
 import com.example.webshop.model.mapper.CartMapper;
-import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.repository.CartItemRepository;
 import com.example.webshop.repository.CartRepository;
 import com.example.webshop.repository.ProductRepository;
@@ -134,6 +132,7 @@ public class CartService {
     }
 
     private CartItem findExistingCartItem(Cart cart, Long productId) {
+
         return cart.getCartItems().stream()
                 .filter(item -> Objects.equals(item.getProduct().getId(), productId))
                 .findFirst()
@@ -197,6 +196,7 @@ public class CartService {
         return cartRepository.findByUser(loggedUser).stream()
                 .map(CartMapper::toDto)
                 .collect(Collectors.toList());
+
 
     }
 

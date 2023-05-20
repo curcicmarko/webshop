@@ -31,7 +31,6 @@ public class WebSecurityConfiguration {
                 .requestMatchers("/authenticate/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
                 .requestMatchers(HttpMethod.GET,"/category/**").permitAll()
-                .requestMatchers("/cart/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

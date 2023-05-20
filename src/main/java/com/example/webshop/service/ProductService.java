@@ -2,12 +2,9 @@ package com.example.webshop.service;
 
 import com.example.webshop.exception.NotFoundException;
 import com.example.webshop.model.dto.ProductDto;
-import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.entity.Category;
 import com.example.webshop.model.entity.Product;
-import com.example.webshop.model.entity.User;
 import com.example.webshop.model.mapper.ProductMapper;
-import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.repository.CategoryRepository;
 import com.example.webshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;

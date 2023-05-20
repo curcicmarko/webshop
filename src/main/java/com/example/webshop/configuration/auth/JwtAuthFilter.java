@@ -10,7 +10,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,11 +28,10 @@ public class JwtAuthFilter extends GenericFilterBean {
 
     private final JwtProvider jwtProvider;
 
-
     private final UserDetailsService userDetailsService;
 
-
     private final AuthTokenService authTokenService;
+
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)

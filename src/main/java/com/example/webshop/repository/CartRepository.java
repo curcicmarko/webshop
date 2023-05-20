@@ -11,5 +11,6 @@ import java.util.List;
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
      List<Cart> findByUser(User user);
+
      Page<Cart> findAll(Pageable pageable);
 }

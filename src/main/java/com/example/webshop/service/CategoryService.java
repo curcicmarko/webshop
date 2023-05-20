@@ -7,6 +7,7 @@ import com.example.webshop.model.mapper.CategoryMapper;
 import com.example.webshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 

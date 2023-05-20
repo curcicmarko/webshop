@@ -3,13 +3,10 @@ package com.example.webshop.controller;
 import com.example.webshop.model.dto.UserDto;
 import com.example.webshop.model.mapper.UserMapper;
 import com.example.webshop.service.UserService;
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

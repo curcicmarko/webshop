@@ -1,10 +1,8 @@
 package com.example.webshop.service;
 
 import com.example.webshop.exception.NotFoundException;
-import com.example.webshop.model.dto.CartDto;
 import com.example.webshop.model.dto.OrderDto;
 import com.example.webshop.model.entity.*;
-import com.example.webshop.model.mapper.CartMapper;
 import com.example.webshop.model.mapper.OrderMapper;
 import com.example.webshop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +62,7 @@ public class OrderService {
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         User loggedUser = userRepository.findByEmail(email);
         Cart cart = loggedUser.getCarts().get(0);
+
 
         Order order = createNewOrder(cart, loggedUser);
         saveOrder(order);

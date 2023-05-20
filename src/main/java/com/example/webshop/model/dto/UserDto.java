@@ -3,8 +3,6 @@ package com.example.webshop.model.dto;
 import com.example.webshop.model.entity.UserRole;
 import lombok.*;
 
-import java.util.List;
-
 @Builder
 @Getter
 @Setter
